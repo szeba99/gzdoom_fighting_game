@@ -1,0 +1,5 @@
+punch1 "sounds/punch1.ogg"
+punch2 "sounds/punch2.ogg"
+death "sounds/death.ogg"
+
+$random *punch { punch1 punch2 }

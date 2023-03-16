@@ -1,0 +1,175 @@
+// Animation states for the player
+enum EAnimationStates
+{
+	ANIMSTATE_SPAWN,
+	ANIMSTATE_STAND,
+	ANIMSTATE_WALKING,
+	ANIMSTATE_JUMPING,
+	ANIMSTATE_CROUCHING,
+	ANIMSTATE_DEATH,
+	ANIMSTATE_PUNCH_LEFT,
+	ANIMSTATE_KICK_LEFT,
+	ANIMSTATE_DEFEND,
+	TOTAL_PLAYER_STATES
+}
+
+// This is the actual player sprite that will be seen and animated in-game.
+extend class SideScrollerPlayer
+{
+	const moveThreshold = 0.05;
+	bool busy;
+
+	void AnimateSideScrollerPlayer(void)
+	{
+		// retrieve player information
+		bool isOnfloor = OnFloor();
+		double pSpeed = GetMoveSpeed();
+
+		// set direction
+		Scale.Y = spriteScale;
+		if (dir == DIR_Left)
+		{
+			Scale.X = spriteScale;
+		}
+		else if (dir == DIR_Right)
+		{
+			Scale.X = -spriteScale;
+		}
+
+		////////////////////////////////////////////////////////////////////////
+		//
+		// STATES
+		// Must be assigned in the exact order as EAnimationStates
+		//
+		////////////////////////////////////////////////////////////////////////
+		int StateToPlay;
+		StateLabel stateName[TOTAL_PLAYER_STATES];
+		stateName[0] = "Spawn";
+		stateName[1] = "Stand";
+		stateName[2] = "Walking";
+		stateName[3] = "Jumping";
+		stateName[4] = "Crouching";
+		stateName[5] = "Death";
+		stateName[6] = "Punch_Left";
+		stateName[7] = "Kick_Left";
+		stateName[8] = "Defend";
+
+		// standing still
+		if (isOnFloor && pSpeed <= moveThreshold)
+		{
+			StateToPlay = ANIMSTATE_STAND;
+		}
+
+		// walking
+		if (isOnFloor && pSpeed > moveThreshold)
+		{
+			StateToPlay = ANIMSTATE_WALKING;
+		}
+
+		// jump
+		if (!isOnFloor)
+		{
+			StateToPlay = ANIMSTATE_JUMPING;
+		}
+
+		// crouching
+		if (isCrouching)
+		{
+			StateToPlay = ANIMSTATE_CROUCHING;
+		}
+		
+		if (GetPlayerInput(INPUT_BUTTONS) & BT_USE)
+		{
+			StateToPlay = ANIMSTATE_DEFEND;
+			isCrouching = True;
+		}
+		
+		//punch
+		if (!busy || InStateSequence(CurState, ResolveState("Punch_Left")))
+		{
+			if ((GetPlayerInput(INPUT_BUTTONS) & BT_ATTACK) || InStateSequence(CurState, ResolveState("Punch_Left")))
+			{
+				StateToPlay = ANIMSTATE_PUNCH_LEFT;
+			}
+		}
+		
+		if (!busy || InStateSequence(CurState, ResolveState("Kick_Left")))
+		{
+			if ((GetPlayerInput(INPUT_BUTTONS) & BT_ALTATTACK) || InStateSequence(CurState, ResolveState("Kick_Left")))
+			{
+				StateToPlay = ANIMSTATE_KICK_LEFT;
+			}
+			
+		}
+		
+		//kick
+		
+
+		// death
+		if (health < 1  || InStateSequence(CurState, ResolveState("Death")))
+		{
+			StateToPlay = ANIMSTATE_DEATH;
+		}
+		// set the new animation
+		if (oldState != StateToPlay)
+		{
+			SetStateLabel(stateName[StateToPlay]);
+			oldState = StateToPlay;
+		}
+	}
+
+	States
+	{
+	Spawn:
+	Stand:
+		TNT1 A 0 {bInvulnerable = False; busy=false;}
+		FASZ AB 10;
+		Loop;
+	Walking:
+		TNT1 A 0 {bInvulnerable = False;}
+		FASZ CD 6;
+		Loop;
+	Jumping:
+		TNT1 A 0 {bInvulnerable = False;}
+		FASZ A -1;
+		Loop;
+	Crouching:
+		TNT1 A 0 {bInvulnerable = False;}
+		FASZ E -1;
+		Loop;
+	Death:
+		TNT1 A 0 {bInvulnerable = False; A_PlaySound("Death");}
+		FASZ HIJKLMNOPPPPPPPPPPPPPPPPPPP 10;
+		FASZ PPPPPPPPPPPPPPPPPPPPPPPPPPP 10;
+		FASZ PPPPPPPPPPPPPPPPPPPPPPPPPPP 10;
+		FASZ PPPPPPPPPPPPPPPPPPPPPPPPPPP 10;
+		FASZ PPPPPPPPPPPPPPPPPPPPPPPPPPP 10;
+		FASZ PPPPPPPPPPPPPPPPPPPPPPPPPPP 10;
+		FASZ PPPPPPPPPPPPPPPPPPPPPPPPPPP 10;
+		FASZ PPPPPPPPPPPPPPPPPPPPPPPPPPP 10;
+		FASZ PPPPPPPPPPPPPPPPPPPPPPPPPPP 10;
+		Goto Death+10;
+	Punch_Left:
+		TNT1 A 0 
+		{
+		bInvulnerable = False;
+		busy=true;
+		A_PlaySound("*punch");
+		}
+		FASZ F 10 A_SpawnItemEx("Punch",20.0,0,35.0,1.0);
+		Goto Stand;
+	Kick_Left:
+		TNT1 A 0 
+		{
+		bInvulnerable = False;
+		busy=true;
+		A_PlaySound("*punch");
+		}
+		FASZ G 10 A_SpawnItemEx("Punch",20.0,0,5.0,1.0);
+		Goto Stand;
+	Defend:
+		TNT1 A 0 {bInvulnerable = True;}
+		FASZ Q 10;
+		Loop;
+	}
+}

@@ -1,0 +1,32 @@
+class SideScrollerCamera : SecurityCamera
+{
+	// Side scroller camera settings
+	const CAMERA_OFFSET = 0;
+	const CAMERA_DISTANCE = -150;
+	const CAMERA_HEIGHT = 50;
+	const CAMERA_ANGLE = 90;
+
+	// the player to track/scroll to
+	SideScrollerPlayer plr;
+	
+	override void Tick(void)
+	{
+		// position and point the camera to the player
+		if (plr)
+		{
+			double cx = plr.Pos.X + CAMERA_OFFSET;
+			double cy = plr.Pos.Y + CAMERA_DISTANCE;
+			double cz = plr.Pos.Z + CAMERA_HEIGHT;
+			Vector3 camPos = (cx, cy, cz);
+			SetOrigin(camPos, true);
+			Angle = CAMERA_ANGLE;
+		}
+		else
+		{
+			// player doesn't exist, destroy the camera
+			Destroy();
+		}
+
+		Super.Tick();
+	}
+}

@@ -1,0 +1,12 @@
+GameInfo
+{
+	PlayerClasses = "SideScrollerPlayer"
+	StatusBarClass = "SideScrollerHUD"
+	AddEventHandlers = "SideScrollerHandler"
+}
+
+Map MAP01 "Stage 1"
+{
+	Music = "FUNK"
+	Sky1 = "SKY2"
+}

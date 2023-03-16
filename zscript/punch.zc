@@ -1,0 +1,24 @@
+class Punch : Actor
+{
+	Default
+	{
+		Radius 6;
+		Height 8;
+		Speed 10;
+		FastSpeed 20;
+		DamageFunction 35;
+		Projectile;
+		+RANDOMIZE
+		+ZDOOMTRANS
+		RenderStyle "Add";
+		Alpha 1;
+		//SeeSound "";
+		DeathSound "*fist";
+	}
+	States
+	{
+	Spawn:
+		BAL1 ABABAB 1 BRIGHT A_FadeOut();
+		Stop;
+	}
+}
